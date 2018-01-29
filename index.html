@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Notes</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.0/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.0/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.15/browser.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <script type="text/babel">
+      var Board = React.createClass({
+        getInitialState: function() {
+          return {
+            notes: [
+              'Just a comment',
+              'Hello World',
+              'Ilya',
+              'Some new text'
+            ]
+          }
+        },
+        addNote: function() {
+          var notes = this.state.notes;
+          notes.push('');
+          this.setState({notes: notes});
+        },
+        removeNote: function(index) {
+          var notes = this.state.notes;
+          notes.splice(index, 1);
+          this.setState({notes: notes});
+        },
+        updateNote: function(text, index) {
+          var notes = this.state.notes;
+          notes[index] = text;
+          this.setState({notes: notes});
+        },
+        renderNote: function(text, index) {
+          return (
+            <Note
+              key={index}
+              index={index}
+              updateNoteText={this.updateNote}
+              removeFromBoard={this.removeNote} >
+              {text}
+            </Note>
+          )
+        },
+        render: function() {
+          return (
+            <div className="board">
+              <div className="board-toolbar">
+                <button className="boardButton-add" onClick={this.addNote}> Add Note </button>
+              </div>
+              <div>
+                {this.state.notes.map(this.renderNote)}
+              </div>
+            </div>
+          )
+        }
+      });
+
+      var Note = React.createClass({
+        getInitialState: function() {
+          return {editing: !this.props.children}
+        },
+        edit: function() {
+          this.setState({editing: true});
+        },
+        save: function() {
+          var text = this.refs.textInput.value;
+
+          if(text == '') {
+            this.remove()
+          } else {
+            this.props.updateNoteText(text, this.props.index);
+          }
+
+          this.setState({editing: false});
+        },
+        remove: function() {
+          this.props.removeFromBoard(this.props.index);
+        },
+        renderNote: function() {
+          return (
+            <div className="noteContainer">
+              <h2 className="noteText">{this.props.children}</h2>
+              <button onClick={this.edit} className="noteButton-edit">Edit</button>
+              <button onClick={this.remove} className="noteButton-remove">Remove</button>
+            </div>
+          )
+        },
+        renderForm: function() {
+          return (
+            <div className="noteContainer">
+              <input
+                ref="textInput"
+                className="noteTextInput"
+                defaultValue={this.props.children}
+              />
+              <br />
+              <button onClick={this.save} className="noteButton-save">Save</button>
+            </div>
+          )
+        },
+        render: function() {
+          if (this.state.editing) {
+            return this.renderForm();
+          } else {
+            return this.renderNote();
+          }
+        }
+      });
+
+      ReactDOM.render(<Board />, document.getElementById('app'));
+    </script>
+  </body>
+</html>
